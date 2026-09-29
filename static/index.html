@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101313">
+  <title>IncidentOps | Response console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css?v=resolution-layout-2">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.2.6/dist/purify.min.js"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#triage" aria-label="IncidentOps home">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span>incident<span class="brand-light">ops</span></span>
+      </a>
+      <div class="environment"><span class="environment-dot"></span> RESPONSE CONSOLE <span class="divider">/</span> <span id="bank-label">incidentops-v1</span></div>
+      <div class="header-actions">
+        <div class="service-status" aria-label="Service status">
+          <span class="status-item"><i id="hindsight-dot" class="status-dot"></i> Hindsight</span>
+          <span class="status-item"><i id="groq-dot" class="status-dot"></i> Groq</span>
+        </div>
+        <button class="button button-quiet" id="reset-button" title="Switch to an empty memory bank"><span aria-hidden="true">↺</span> Cold Start</button>
+      </div>
+    </header>
+
+    <main>
+      <section class="briefing" aria-label="IncidentOps status">
+        <div>
+          <div class="eyebrow"><span class="pulse"></span> HUMAN-APPROVED MEMORY SYSTEM</div>
+          <h1>Response, with <span>institutional memory.</span></h1>
+          <p class="briefing-copy">Triage stays grounded in evidence. Your team decides what the system learns.</p>
+        </div>
+        <div class="memory-meter">
+          <div class="meter-head"><span>MEMORY BANK</span><strong id="memory-count">—</strong></div>
+          <div class="meter-track"><span id="memory-bar"></span></div>
+          <div class="meter-foot"><span id="memory-bank-small">incidentops-v1</span><span id="memory-count-label">lessons stored</span></div>
+        </div>
+      </section>
+
+      <nav class="tabs" aria-label="IncidentOps panels" role="tablist">
+        <button class="tab active" data-tab="triage" role="tab" aria-selected="true"><span class="tab-index">01</span> Live Triage</button>
+        <button class="tab" data-tab="timeline" role="tab" aria-selected="false"><span class="tab-index">02</span> Learning Timeline <span id="timeline-count" class="tab-count">0</span></button>
+        <button class="tab" data-tab="explorer" role="tab" aria-selected="false"><span class="tab-index">03</span> Memory Explorer</button>
+        <button class="tab" data-tab="sandbox" role="tab" aria-selected="false"><span class="tab-index">04</span> Sandbox</button>
+        <button class="tab" data-tab="ingest" role="tab" aria-selected="false"><span class="tab-index">05</span> Ingest Logs</button>
+        <button class="tab" data-tab="resolution" role="tab" aria-selected="false"><span class="tab-index">06</span> Log Resolution</button>
+      </nav>
+
+      <section class="panel active" id="panel-triage" role="tabpanel">
+        <div class="section-heading">
+          <div><div class="eyebrow">PARALLEL EVALUATION</div><h2>One incident. Two responses.</h2></div>
+          <div class="triage-status"><span id="interaction-counter" class="interaction-counter">Interaction 0 | 0 lessons in memory</span><span class="live-indicator"><span class="pulse"></span> LIVE COMPARISON</span></div>
+        </div>
+        <form id="triage-form" class="question-form">
+          <label class="sr-only" for="question-input">Describe the incident</label>
+          <textarea id="question-input" rows="2" placeholder="Describe the incident, symptoms, and what changed..." required maxlength="12000"></textarea>
+          <div class="form-footer"><span class="input-hint">Incident response, infrastructure, or security questions</span><button class="button button-primary" type="submit"><span class="submit-label">Run triage</span><span aria-hidden="true">↗</span></button></div>
+        </form>
+        <div id="triage-error" class="inline-error hidden" role="alert"></div>
+        <div id="triage-comparison-slot">
+        <div class="comparison-grid" id="comparison-grid">
+          <article class="answer-panel stateless-panel">
+            <header class="answer-header"><div class="answer-title"><span class="panel-symbol neutral-symbol">∅</span><div><h3>Stateless AI</h3><span class="answer-subtitle">NO MEMORY</span></div></div><span class="latency" id="stateless-latency">—</span></header>
+            <div class="answer-body markdown-body" id="stateless-answer"><div class="empty-state"><span class="empty-icon">01</span><p>General incident guidance appears here.</p></div></div>
+            <footer class="answer-footer"><span>Groq only</span><span>Independent baseline</span></footer>
+          </article>
+          <article class="answer-panel memory-panel">
+            <header class="answer-header"><div class="answer-title"><span class="panel-symbol memory-symbol">✳</span><div><h3>IncidentOps</h3><span class="answer-subtitle">HINDSIGHT + GROQ</span></div></div><span class="latency" id="grounded-latency">—</span></header>
+            <div class="grounding-strip" id="grounding-strip"><div class="grounding-metrics"><span id="grounding-text">Grounded on 0 recalled lessons</span><span id="recall-count-text">Recalled 0 of 0 lessons for this answer</span></div><span id="learned-badge" class="learned-badge hidden"><span>✳</span> Learned from past incidents</span></div>
+            <div class="answer-body markdown-body" id="grounded-answer"><div class="empty-state"><span class="empty-icon memory-empty">✳</span><p>Relevant approved memories will shape this response.</p></div></div>
+            <div class="recalled-sources hidden" id="recalled-sources"></div>
+            <footer class="answer-footer"><span>Recall → Groq</span><span>Evidence first</span></footer>
+          </article>
+        </div>
+        </div>
+        <div class="approval-callout hidden" id="approval-callout"><div><span class="approval-kicker">AFTER ACTION</span><strong>Was there a durable lesson here?</strong><p>Review it before it enters the team memory.</p></div><div class="approval-actions"><button class="button button-outline" id="approve-button">Approve as lesson <span aria-hidden="true">＋</span></button><button class="button button-quiet" id="reject-button">Reject</button></div></div>
+      </section>
+
+      <section class="panel" id="panel-timeline" role="tabpanel">
+        <div class="section-heading"><div><div class="eyebrow">HUMAN-IN-THE-LOOP</div><h2>Learning Timeline</h2></div><span class="timeline-status"><span class="pulse"></span> APPROVAL REQUIRED</span></div>
+        <p class="section-copy">Only lessons explicitly approved by an engineer are stored in Hindsight.</p>
+        <div id="timeline-list" class="timeline-list"><div class="large-empty"><span class="empty-icon">↳</span><strong>No approved lessons yet</strong><p>Run a triage, then approve a useful lesson to begin building team memory.</p></div></div>
+      </section>
+
+      <section class="panel" id="panel-explorer" role="tabpanel">
+        <div class="section-heading"><div><div class="eyebrow">HINDSIGHT BANK</div><h2>Memory Explorer</h2></div><button class="button button-outline" id="refresh-memories"><span aria-hidden="true">⟳</span> Refresh</button></div>
+        <p class="section-copy">Structured memories currently available to IncidentOps. Recalled content is truncated for display.</p>
+        <div id="memory-list" class="memory-list"><div class="large-empty"><span class="empty-icon">⌕</span><strong>Connect to a memory bank</strong><p>Refresh to load stored memory units.</p></div></div>
+      </section>
+
+      <section class="panel" id="panel-sandbox" role="tabpanel">
+        <div class="section-heading"><div><div class="eyebrow">MEMORY WORKBENCH</div><h2>Sandbox</h2></div><span class="sandbox-note">Direct Hindsight queries</span></div>
+        <div class="sandbox-grid">
+          <article class="sandbox-tool"><div class="tool-heading"><span class="tool-icon">⌕</span><div><h3>Recall</h3><p>Retrieve matching facts from the current bank.</p></div></div><form class="sandbox-form" data-kind="recall"><label class="sr-only" for="recall-query">Recall query</label><input id="recall-query" name="query" placeholder="Search memory..." required><button class="icon-button" aria-label="Run recall">↗</button></form><pre class="raw-output" id="recall-output">Raw recall results will appear here.</pre></article>
+          <article class="sandbox-tool"><div class="tool-heading"><span class="tool-icon reflect-icon">✳</span><div><h3>Reflect</h3><p>Synthesize a memory-grounded response.</p></div></div><form class="sandbox-form" data-kind="reflect"><label class="sr-only" for="reflect-query">Reflect query</label><input id="reflect-query" name="query" placeholder="Ask about accumulated knowledge..." required><button class="icon-button" aria-label="Run reflect">↗</button></form><pre class="raw-output" id="reflect-output">Raw reflect results will appear here.</pre></article>
+        </div>
+      </section>
+
+      <section class="panel" id="panel-ingest" role="tabpanel">
+        <div class="section-heading"><div><div class="eyebrow">REAL SYSTEM DATA</div><h2>Ingest Live Error Logs</h2></div><span class="source-stamp">LOGHUB / BGL</span></div>
+        <p class="section-copy">Paste current system output for an incident readout, or load a real BGL excerpt from the LogHub research dataset.</p>
+        <form id="ingest-form" class="ingest-form">
+          <label class="sr-only" for="logs-input">Error logs</label>
+          <div class="log-toolbar">
+            <a class="log-source-badge" href="https://github.com/logpai/loghub" target="_blank" rel="noreferrer">Source: LogHub BGL dataset (real supercomputer logs, not synthetic)</a>
+            <span id="log-stats" class="log-stats" aria-live="polite">0 lines pasted, 0 distinct error patterns detected</span>
+          </div>
+          <textarea id="logs-input" rows="10" maxlength="16000" placeholder="Paste relevant error logs here..." required></textarea>
+          <div class="form-footer"><span class="input-hint">Paste logs or load a named BGL scenario</span><div class="ingest-actions"><select id="bgl-scenario" aria-label="Choose a real LogHub BGL scenario"><option value="">Choose a real BGL scenario...</option><option value="instruction-cache-parity">Instruction cache parity error</option><option value="ciod-chdir-failure">CIOD chdir failure</option><option value="double-hummer-alignment">Double-hummer alignment exceptions</option></select><button class="button button-outline" id="load-sample" type="button">Load selected sample</button><button class="button button-primary" type="submit"><span class="ingest-label">Triage logs</span><span aria-hidden="true">↗</span></button></div></div>
+        </form>
+        <div id="ingest-error" class="inline-error hidden" role="alert"></div>
+        <div id="ingest-comparison-slot"></div>
+        <div id="ingest-approval" class="ingest-approval hidden"><button class="button button-outline" id="ingest-approve" type="button">Review and approve lesson <span aria-hidden="true">＋</span></button></div>
+      </section>
+
+      <section class="panel" id="panel-resolution" role="tabpanel">
+        <div class="section-heading"><div><div class="eyebrow">ENGINEER-RECORDED FIX</div><h2>Log Resolution</h2></div></div>
+        <p class="section-copy">Record what happened and the exact fix you applied. This is saved directly to memory, without AI-generated content or triage approval.</p>
+        <form id="resolution-form" class="resolution-form" method="post">
+          <div class="resolution-fields">
+            <div class="resolution-field">
+              <label class="resolution-label" for="resolution-problem"><span class="resolution-number">01</span><span><strong>Problem</strong><small>What happened?</small></span></label>
+              <textarea id="resolution-problem" name="problem" rows="5" minlength="10" maxlength="5000" placeholder="Describe the symptom, error, or failure..." required></textarea>
+            </div>
+            <div class="resolution-field">
+              <label class="resolution-label" for="resolution-solution"><span class="resolution-number">02</span><span><strong>Solution</strong><small>What exact steps fixed it?</small></span></label>
+              <textarea id="resolution-solution" name="solution" rows="5" minlength="10" maxlength="5000" placeholder="Write exactly what you did to resolve the problem..." required></textarea>
+            </div>
+          </div>
+          <div class="form-footer"><span class="input-hint">Both fields need at least 10 non-whitespace characters.</span><button class="button button-primary" type="submit"><span class="submit-label">Log resolution</span><span aria-hidden="true">＋</span></button></div>
+        </form>
+        <div id="resolution-error" class="inline-error hidden" role="alert"></div>
+      </section>
+    </main>
+    <footer class="app-footer"><span>INCIDENTOPS <span class="footer-dot">/</span> HUMAN-APPROVED MEMORY</span><span>Grounded responses are not a substitute for on-call judgment.</span></footer>
+  </div>
+
+  <dialog id="lesson-dialog" class="lesson-dialog">
+    <form id="lesson-form" method="dialog">
+      <div class="dialog-top"><div><div class="eyebrow">ENGINEER REVIEW</div><h2>Approve a lesson</h2></div><button class="dialog-close" type="button" id="close-dialog" aria-label="Close">×</button></div>
+      <p class="dialog-copy">Edit this lesson to keep it specific and reusable. Nothing is saved until you approve.</p>
+      <label for="lesson-input">Lesson to retain</label><textarea id="lesson-input" rows="7" minlength="10" maxlength="5000" placeholder="Check the NFS mount first, remount, resubmit the job. Do not recreate the directory." required></textarea>
+      <div id="lesson-error" class="inline-error hidden" role="alert"></div>
+      <div class="dialog-actions"><button class="button button-quiet" type="button" id="cancel-lesson">Cancel</button><button class="button button-primary" type="submit"><span class="lesson-submit-label">Approve and save</span><span aria-hidden="true">＋</span></button></div>
+    </form>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="/static/app.js?v=log-resolution-post-2"></script>
+</body>
+</html>
